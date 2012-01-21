@@ -3,6 +3,11 @@
 #define SUBSCRIBE 3
 #define PUBLISH 4
 
+#define CONNECTED 1
+#define DISCONNECTED 2
+#define SUBSCRIBED 3
+#define PUBLISHED 4
+
 struct flux_connect
 {
 	int command;
@@ -13,4 +18,10 @@ struct flux_disconnect
 {
 	int command;
 	char name[16];//do you need this ??
+};
+struct flux_publish
+{
+	int command;
+	char topic[16];
+	int len;
 };

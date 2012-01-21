@@ -81,13 +81,13 @@ int main()
 
 		for(i=0;i<connection_count;i++)
 		{
-			if(connections[i])printf("i=%d sock=%d\n",i,connections[i]->sock);
+			//if(connections[i])printf("i=%d sock=%d\n",i,connections[i]->sock);
 
 			if(connections[i] && connections[i]->sock !=-1)
 			{
 				FD_SET(connections[i]->sock,&readfds);
 				/*Add this socket to the fd set*/
-				printf("Adding %d to list\n",connections[i]->sock);
+				//printf("Adding %d to list\n",connections[i]->sock);
 				if(connections[i]->sock > sockmax) sockmax=connections[i]->sock;
 			}
 		}
@@ -97,12 +97,10 @@ int main()
 		fdcount = select(sockmax+1, &readfds, &writefds, NULL, &timeout);
 		if(fdcount == -1)
 		{
-			printf("Some error might have occured\b");
+			printf("Some error might have occured\n");
 		}
 		else
 		{
-printf("Errorno=%d\n",errno);
-			printf("Value of fdcount=%d\n",fdcount);
 			for(i=0;i<connection_count;i++)
 			{
 				if(connections[i] && connections[i]->sock !=-1 && FD_ISSET(connections[i]->sock,&readfds))
@@ -110,11 +108,7 @@ printf("Errorno=%d\n",errno);
 					printf("Some message received from %d\n",connections[i]->sock);
 					if(process_message(connections[i])<=0)
 					{
-						FD_CLR(connections[i]->sock,&readfds);
-						close(connections[i]->sock);
-						connections[i]->sock=-1;
-						printf("i=%d sock=%d\n",i,connections[i]->sock);
-						printf("Test\n");
+						process_close_message(connections[i],&readfds);
 					}
 				}
 			}
@@ -122,10 +116,13 @@ printf("Errorno=%d\n",errno);
 		if(FD_ISSET(sock, &readfds))
 		{
 			printf("Blocking at accept\n");
+			size=4;
 			new_sock = accept(sock, (struct sockaddr *)&client_addr, &size);
-if(new_sock <0) perror("accept");
-			printf("Accepted new connection\n");
-			new_connection = flux_connection_init(new_sock);
+			if(new_sock <0) perror("accept");
+			printf("New connection with size=%d ip=%s port=%d\n",size,inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
+			new_connection = flux_connection_init(new_sock,&client_addr);
+			//strcpy(new_connection->ip,inet_ntoa(client_addr.sin_addr));
+			//new_connection->port=ntohs(client_addr.sin_port);
 			for(i=0; i<connection_count; i++)
 			{
 				if(connections[i] == NULL)
@@ -138,6 +135,7 @@ if(new_sock <0) perror("accept");
 			/*Code for more than 100 clients connecting for future*/
 
 		}
+		print_connections(connections,connection_count);
 
 	}       
 
@@ -152,13 +150,14 @@ int process_message(struct flux_connection *conn)
 	int ret=0;
 	int socket=conn->sock;
 	struct flux_connect connect_msg;
+	struct flux_publish publish_msg;
 	ret=recv(socket,(char *)&command,4,0);
 	if(ret<=0)
 	{
 		printf("Socket %d iss closed\n",socket);
 		return ret;
 	}
-	
+
 	printf("ret=%d Command=%d from fd=%d\n",ret,command,socket);
 	//now go ahead and parse the remaining bytes
 	switch(command)
@@ -168,11 +167,28 @@ int process_message(struct flux_connection *conn)
 			ret=recv(socket,connect_msg.name,sizeof(connect_msg)-4,0);
 			if(ret<=0) return ret;
 			printf("Received connect message with name %s\n",connect_msg.name);
+			strcpy(conn->name,connect_msg.name);
 			break;
 		case DISCONNECT:break;
-		case PUBLISH:break;
+		case PUBLISH:
+			publish_msg.command=command;
+//read topicname and length now
+			ret=recv(socket,publish_msg.topic,20,0);
+			if(ret<=0) return ret;
+			printf("Received publish message with topic %s and length=%d\n",publish_msg.topic,publish_msg.len);
+			break;
 		case SUBSCRIBE:break;
 	}
 	printf("Returning value %d\n",ret);
 	return ret;
 }
+
+int process_close_message(struct flux_connection *conn,fd_set *fdset)
+{
+	FD_CLR(conn->sock,fdset);
+	close(conn->sock);
+	conn->sock=-1;
+	return 0;
+}
+
+
