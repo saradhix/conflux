@@ -151,6 +151,7 @@ int process_message(struct flux_connection *conn)
 	int socket=conn->sock;
 	struct flux_connect connect_msg;
 	struct flux_publish publish_msg;
+	struct flux_subscribe subscribe_msg;
 	ret=recv(socket,(char *)&command,4,0);
 	if(ret<=0)
 	{
@@ -168,6 +169,7 @@ int process_message(struct flux_connection *conn)
 			if(ret<=0) return ret;
 			printf("Received connect message with name %s\n",connect_msg.name);
 			strcpy(conn->name,connect_msg.name);
+			conn->state=CONNECTED;
 			break;
 		case DISCONNECT:break;
 		case PUBLISH:
@@ -177,7 +179,12 @@ int process_message(struct flux_connection *conn)
 			if(ret<=0) return ret;
 			printf("Received publish message with topic %s and length=%d\n",publish_msg.topic,publish_msg.len);
 			break;
-		case SUBSCRIBE:break;
+		case SUBSCRIBE:
+			subscribe_msg.command=command;
+			ret=recv(socket,subscribe_msg.topic,20,0);
+			if(ret<=0) return ret;
+			printf("Received subscribe message with topic %s and length=%d\n",subscribe_msg.topic,subscribe_msg.len);
+			break;
 	}
 	printf("Returning value %d\n",ret);
 	return ret;

@@ -23,12 +23,16 @@ int main()
 	int i,ret;
 	struct flux_connect connect_msg;
 	struct flux_publish publish_msg;
+	struct flux_subscribe subscribe_msg;
 
 	connect_msg.command=CONNECT;
 	strcpy(connect_msg.name,"hello");
 	publish_msg.command=PUBLISH;	
 	strcpy(publish_msg.topic,"testtopic");
 	publish_msg.len=32;
+	subscribe_msg.command=SUBSCRIBE;	
+	strcpy(subscribe_msg.topic,"testtopic2");
+	subscribe_msg.len=32;
 
 	host = gethostbyname("127.0.0.1");
 
@@ -61,6 +65,9 @@ int main()
 				break;
 			case 2:
 				ret=send(sock,(void *)&publish_msg,sizeof(publish_msg), 0); 
+				break;
+			case 3:
+				ret=send(sock,(void *)&subscribe_msg,sizeof(subscribe_msg), 0); 
 				break;
 		}
 		if(ret<=0) perror("send");

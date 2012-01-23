@@ -25,3 +25,10 @@ struct flux_publish
 	char topic[16];
 	int len;
 };
+
+struct flux_subscribe
+{
+	int command;
+	char topic[16];
+	int len;
+};
