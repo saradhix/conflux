@@ -15,15 +15,25 @@
 int main()
 {
 
-	int sock, bytes_recieved;  
+	int sock, choice;  
 	char send_data[1024]="Hello world\n",recv_data[1024];
 	struct hostent *host;
 	struct sockaddr_in server_addr;  
 	char buff[10];
 	int i,ret;
 	struct flux_connect connect_msg;
-	connect_msg.command=1;
+	struct flux_publish publish_msg;
+	struct flux_subscribe subscribe_msg;
+
+	connect_msg.command=CONNECT;
 	strcpy(connect_msg.name,"hello");
+	publish_msg.command=PUBLISH;	
+	strcpy(publish_msg.topic,"testtopic");
+	publish_msg.len=32;
+	strcpy(publish_msg.payload,"Testpayload");
+	subscribe_msg.command=SUBSCRIBE;	
+	strcpy(subscribe_msg.topic,"testtopic2");
+	subscribe_msg.len=32;
 
 	host = gethostbyname("127.0.0.1");
 
@@ -46,10 +56,21 @@ int main()
 	while(1)
 	{
 		printf("Press enter to send data\n");
-		scanf("%s",buff); 
-		printf("Sending byf-%s\n",send_data);
+		scanf("%d",&choice); 
+		switch(choice)
+		{
+			case 1:
+				printf("Sending byf-%s\n",send_data);
 
-		ret=send(sock,(void *)&connect_msg,sizeof(connect_msg), 0); 
+				ret=send(sock,(void *)&connect_msg,sizeof(connect_msg), 0); 
+				break;
+			case 2:
+				ret=send(sock,(void *)&publish_msg,sizeof(publish_msg), 0); 
+				break;
+			case 3:
+				ret=send(sock,(void *)&subscribe_msg,sizeof(subscribe_msg), 0); 
+				break;
+		}
 		if(ret<=0) perror("send");
 	}
 
