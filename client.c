@@ -30,7 +30,10 @@ int main()
 	publish_msg.command=PUBLISH;	
 	strcpy(publish_msg.topic,"testtopic");
 	publish_msg.len=32;
+<<<<<<< HEAD
 	strcpy(publish_msg.payload,"Testpayload");
+=======
+>>>>>>> ef6f8849135ebaa1d157b01a345be7072372915d
 	subscribe_msg.command=SUBSCRIBE;	
 	strcpy(subscribe_msg.topic,"testtopic2");
 	subscribe_msg.len=32;

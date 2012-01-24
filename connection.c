@@ -27,13 +27,18 @@ void flux_connection_cleanup(struct flux_connection *connection)
 }
 int print_connections(struct flux_connection **c,int howmany)
 {
+<<<<<<< HEAD
 	int i,j;
+=======
+	int i;
+>>>>>>> ef6f8849135ebaa1d157b01a345be7072372915d
 	for(i=0;i<howmany;i++)
 	{
 		if(c[i])
 		{
 			snprintf(confluxlog,sizeof(confluxlog),"i=%d sock=%d ip=%s port=%d state=%d",i,c[i]->sock,c[i]->ip,c[i]->port,c[i]->state);
 			conflux_log(confluxlog);
+<<<<<<< HEAD
 			if(c[i]->subscription_count)
 			{
 				for(j=0;j<c[i]->subscription_count;j++)
@@ -45,3 +50,22 @@ int print_connections(struct flux_connection **c,int howmany)
 		}
 	}
 }
+=======
+		}
+	}
+}
+/*int print_connection(struct flux_connection *c)
+{
+	int i;
+	if(c==NULL) return;
+	printf("Printing connection\n");
+	SPRINT(confluxlog,"%d",c->sock);
+	SPRINT(confluxlog,"%s",c->ip);
+	SPRINT(confluxlog,"%d",c->port);
+	for(i=0;i<c->subscription_count;i++)
+	{
+		SPRINT(confluxlog,"%s",c->subscriptions[i].sub_name);
+		SPRINT(confluxlog,"%d",c->subscriptions[i].msgs_rx);
+	}
+}*/
+>>>>>>> ef6f8849135ebaa1d157b01a345be7072372915d

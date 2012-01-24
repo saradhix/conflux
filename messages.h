@@ -24,7 +24,10 @@ struct flux_publish
 	int command;
 	char topic[16];
 	int len;
+<<<<<<< HEAD
 	char payload[256];
+=======
+>>>>>>> ef6f8849135ebaa1d157b01a345be7072372915d
 };
 
 struct flux_subscribe

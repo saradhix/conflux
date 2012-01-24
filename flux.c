@@ -116,6 +116,7 @@ int main()
 		if(FD_ISSET(sock, &readfds))
 		{
 			printf("Blocking at accept\n");
+			size=4;
 			new_sock = accept(sock, (struct sockaddr *)&client_addr, &size);
 			if(new_sock <0) perror("accept");
 			printf("New connection with size=%d ip=%s port=%d\n",size,inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
@@ -174,6 +175,7 @@ int process_message(struct flux_connection *conn)
 		case PUBLISH:
 			publish_msg.command=command;
 //read topicname and length now
+<<<<<<< HEAD
 			ret=recv(socket,publish_msg.topic,16,0);
 			ret=recv(socket,&publish_msg.len,4,0);
 			ret=recv(socket,&publish_msg.payload,256,0);
@@ -187,6 +189,17 @@ int process_message(struct flux_connection *conn)
 			if(ret<=0) return ret;
 			printf("Received subscribe message with topic %s and length=%d\n",subscribe_msg.topic,subscribe_msg.len);
 			strcpy(conn->subscriptions[conn->subscription_count++].sub_name,subscribe_msg.topic);
+=======
+			ret=recv(socket,publish_msg.topic,20,0);
+			if(ret<=0) return ret;
+			printf("Received publish message with topic %s and length=%d\n",publish_msg.topic,publish_msg.len);
+			break;
+		case SUBSCRIBE:
+			subscribe_msg.command=command;
+			ret=recv(socket,subscribe_msg.topic,20,0);
+			if(ret<=0) return ret;
+			printf("Received subscribe message with topic %s and length=%d\n",subscribe_msg.topic,subscribe_msg.len);
+>>>>>>> ef6f8849135ebaa1d157b01a345be7072372915d
 			break;
 	}
 	printf("Returning value %d\n",ret);
