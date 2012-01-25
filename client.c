@@ -11,6 +11,7 @@
 #include <errno.h>
 
 #include "messages.h"
+#include "net.h"
 
 int main()
 {
@@ -19,24 +20,8 @@ int main()
 	char send_data[1024]="Hello world\n",recv_data[1024];
 	struct hostent *host;
 	struct sockaddr_in server_addr;  
-	char buff[10];
-	int i,ret;
-	struct flux_connect connect_msg;
-	struct flux_publish publish_msg;
-	struct flux_subscribe subscribe_msg;
-
-	connect_msg.command=CONNECT;
-	strcpy(connect_msg.name,"hello");
-	publish_msg.command=PUBLISH;	
-	strcpy(publish_msg.topic,"testtopic");
-	publish_msg.len=32;
-<<<<<<< HEAD
-	strcpy(publish_msg.payload,"Testpayload");
-=======
->>>>>>> ef6f8849135ebaa1d157b01a345be7072372915d
-	subscribe_msg.command=SUBSCRIBE;	
-	strcpy(subscribe_msg.topic,"testtopic2");
-	subscribe_msg.len=32;
+	char buff[160],topic[16];
+	int i,ret,cx=0;
 
 	host = gethostbyname("127.0.0.1");
 
@@ -63,15 +48,20 @@ int main()
 		switch(choice)
 		{
 			case 1:
-				printf("Sending byf-%s\n",send_data);
-
-				ret=send(sock,(void *)&connect_msg,sizeof(connect_msg), 0); 
+				printf("Sending connect choice\n");
+				sprintf(buff,"Name %d",cx++);
+				ret=send_connect_msg(sock,buff);
 				break;
 			case 2:
-				ret=send(sock,(void *)&publish_msg,sizeof(publish_msg), 0); 
+				printf("Sending publish message\n");
+				sprintf(topic,"Topic %d",cx++);
+				sprintf(buff,"This is message number %d",cx);
+				ret=send_publish_msg(sock,topic,buff,strlen(buff));
 				break;
 			case 3:
-				ret=send(sock,(void *)&subscribe_msg,sizeof(subscribe_msg), 0); 
+				printf("Sending subscribe message\n");
+				sprintf(topic,"Subtopic%d",cx++);
+				ret=send_subscribe_msg(sock,topic);
 				break;
 		}
 		if(ret<=0) perror("send");
@@ -81,3 +71,6 @@ int main()
 
 	return 0;
 }
+
+
+
