@@ -116,7 +116,6 @@ int main()
 		if(FD_ISSET(sock, &readfds))
 		{
 			printf("Blocking at accept\n");
-			size=4;
 			new_sock = accept(sock, (struct sockaddr *)&client_addr, &size);
 			if(new_sock <0) perror("accept");
 			printf("New connection with size=%d ip=%s port=%d\n",size,inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
@@ -153,6 +152,7 @@ int process_message(struct flux_connection *conn)
 	struct flux_publish publish_msg;
 	struct flux_subscribe subscribe_msg;
 	ret=recv(socket,(char *)&command,4,0);
+/*Receive the 4 bytes command first. Based on it call appropriate handler function*/
 	if(ret<=0)
 	{
 		printf("Socket %d iss closed\n",socket);
@@ -164,47 +164,37 @@ int process_message(struct flux_connection *conn)
 	switch(command)
 	{
 		case CONNECT:
-			connect_msg.command=command;
-			ret=recv(socket,connect_msg.name,sizeof(connect_msg)-4,0);
-			if(ret<=0) return ret;
-			printf("Received connect message with name %s\n",connect_msg.name);
-			strcpy(conn->name,connect_msg.name);
-			conn->state=CONNECTED;
+			//ret=recv(socket,connect_msg.name,sizeof(connect_msg)-4,0);
+			ret=flux_handle_connect_message(conn);
+			return ret;
+			//printf("Received connect message with name %s\n",connect_msg.name);
 			break;
 		case DISCONNECT:break;
 		case PUBLISH:
-			publish_msg.command=command;
+			//publish_msg.command=command;
 //read topicname and length now
-<<<<<<< HEAD
-			ret=recv(socket,publish_msg.topic,16,0);
+			/*ret=recv(socket,publish_msg.topic,16,0);
 			ret=recv(socket,&publish_msg.len,4,0);
-			ret=recv(socket,&publish_msg.payload,256,0);
-			if(ret<=0) return ret;
-			printf("Received publish message with topic %s and length=%d and payload=%s\n",publish_msg.topic,publish_msg.len,publish_msg.payload);
+			ret=recv(socket,&publish_msg.payload,256,0);*/
+			ret=flux_handle_publish_message(conn);
+			return ret;
+			//printf("Received publish message with topic %s and length=%d and payload=%s\n",publish_msg.topic,publish_msg.len,publish_msg.payload);
 			break;
 		case SUBSCRIBE:
-			subscribe_msg.command=command;
+			/*subscribe_msg.command=command;
 			ret=recv(socket,subscribe_msg.topic,16,0);
 			ret=recv(socket,&subscribe_msg.len,4,0);
-			if(ret<=0) return ret;
-			printf("Received subscribe message with topic %s and length=%d\n",subscribe_msg.topic,subscribe_msg.len);
+			if(ret<=0) return ret;*/
+			ret=flux_handle_subscribe_message(conn);
+			return ret;
+//			printf("Received subscribe message with topic %s and length=%d\n",subscribe_msg.topic,subscribe_msg.len);
 			strcpy(conn->subscriptions[conn->subscription_count++].sub_name,subscribe_msg.topic);
-=======
-			ret=recv(socket,publish_msg.topic,20,0);
-			if(ret<=0) return ret;
-			printf("Received publish message with topic %s and length=%d\n",publish_msg.topic,publish_msg.len);
-			break;
-		case SUBSCRIBE:
-			subscribe_msg.command=command;
-			ret=recv(socket,subscribe_msg.topic,20,0);
-			if(ret<=0) return ret;
-			printf("Received subscribe message with topic %s and length=%d\n",subscribe_msg.topic,subscribe_msg.len);
->>>>>>> ef6f8849135ebaa1d157b01a345be7072372915d
 			break;
 	}
 	printf("Returning value %d\n",ret);
 	return ret;
 }
+
 
 int process_close_message(struct flux_connection *conn,fd_set *fdset)
 {

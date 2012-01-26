@@ -20,8 +20,9 @@ int main()
 	char send_data[1024]="Hello world\n",recv_data[1024];
 	struct hostent *host;
 	struct sockaddr_in server_addr;  
-	char buff[160],topic[16];
+	char buff[160], payload[160],topic[16];
 	int i,ret,cx=0;
+	int topic_len=0,payload_len=0;
 
 	host = gethostbyname("127.0.0.1");
 
@@ -55,7 +56,9 @@ int main()
 			case 2:
 				printf("Sending publish message\n");
 				sprintf(topic,"Topic %d",cx++);
-				sprintf(buff,"This is message number %d",cx);
+				topic_len=strlen(topic);
+				sprintf(buff,"Pay%d",cx);
+				payload_len=strlen(buff);
 				ret=send_publish_msg(sock,topic,buff,strlen(buff));
 				break;
 			case 3:
