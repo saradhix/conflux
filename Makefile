@@ -1,4 +1,4 @@
-flux:	flux.o connection.o memory.o
+flux:	flux.o connection.o memory.o log.o messages.o
 	gcc flux.o connection.o memory.o log.o messages.o -o flux
 flux.o:	flux.c
 	gcc -c flux.c

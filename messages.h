@@ -2,11 +2,13 @@
 #define DISCONNECT 2
 #define SUBSCRIBE 3
 #define PUBLISH 4
+#define UNSUBSCRIBE 5
 
 #define CONNECTED 1
 #define DISCONNECTED 2
 #define SUBSCRIBED 3
 #define PUBLISHED 4
+#define UNSUBSCRIBED 5
 
 #define MAX_NAME_LEN 32
 #define MAX_TOPIC_LEN 32

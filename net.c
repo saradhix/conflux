@@ -67,6 +67,28 @@ int send_subscribe_msg(int fd, char *topic)
 	return ret;
 }
 
+int send_unsubscribe_msg(int fd, char *topic)
+{
+	int ret=0;
+	char buffer[100];
+	char *ptr=buffer;
+	int total_length,topic_len;
+	int command=UNSUBSCRIBE;
+	topic_len=strlen(topic);
+	/*4 bytes of command*/
+	memcpy(ptr,(char *)&command,4);
+	ptr+=4;
+	/*Encode topic length*/
+	memcpy(ptr,(char *)&topic_len,4);
+	ptr+=4;
+	/*Encode topic*/
+	memcpy(ptr,topic,topic_len);
+	ptr+=topic_len;
+	total_length=4+4+topic_len;
+	ret=send(fd,buffer,total_length,0);
+	return ret;
+}
+
 
 int nrecv(int fd,void *buf,int nbytes,int flags)
 {

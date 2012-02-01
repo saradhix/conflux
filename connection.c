@@ -38,7 +38,7 @@ int print_connections(struct flux_connection **c,int howmany)
 			{
 				for(j=0;j<c[i]->subscription_count;j++)
 				{
-					snprintf(confluxlog,sizeof(confluxlog),"j=%d name=%s",j,c[i]->subscriptions[j].sub_name);
+					snprintf(confluxlog,sizeof(confluxlog),"j=%d name=%s valid=%d",j,c[i]->subscriptions[j].sub_name,c[i]->subscriptions[j].is_valid);
 					conflux_log(confluxlog);
 				}
 			}

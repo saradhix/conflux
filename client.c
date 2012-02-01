@@ -66,6 +66,11 @@ int main()
 				sprintf(topic,"Subtopic%d",cx++);
 				ret=send_subscribe_msg(sock,topic);
 				break;
+			case 4:
+				printf("Sending unsubscribe message\n");
+				sprintf(topic,"Subtopic%d",--cx);
+				ret=send_unsubscribe_msg(sock,topic);
+				break;
 		}
 		if(ret<=0) perror("send");
 	}

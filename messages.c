@@ -1,5 +1,6 @@
 #include "connection.h"
 #include "messages.h"
+#include <string.h>
 
 int flux_handle_connect_message(struct flux_connection *conn)
 {
@@ -60,9 +61,44 @@ int flux_handle_subscribe_message(struct flux_connection *conn)
 	ret=recv(sock,topic,topic_length,0);
 	if(ret<=0) return ret;
 	printf("Topic =%s\n",topic);
+	strcpy(conn->subscriptions[conn->subscription_count].sub_name,topic);
+	conn->subscriptions[conn->subscription_count].is_valid=1;
+	conn->subscription_count++;
+
 	return ret;
 
 }
+int flux_handle_unsubscribe_message(struct flux_connection *conn)
+{
+	int sock=0,ret=0;
+	char topic[100]={0};
+	int topic_length=0,i;
+	sock=conn->sock;
+	/*We have already read the command. Rest of the content in the flux_connect should be read*/
+
+	/*Read the topic length*/
+	ret=recv(sock,(char *)&topic_length,4,0);
+	if(ret<=0) return ret;
+	printf("Topic length : %d\n",topic_length);
+
+	/*Read the topic now*/
+	ret=recv(sock,topic,topic_length,0);
+	if(ret<=0) return ret;
+	printf(" Unsubscribed Topic =%s\n",topic);
+
+	/*Search for this topic and make the is_valid field for that particular sub as 0*/
+	for(i=0;i<conn->subscription_count;i++)
+	{
+		printf("Checking %s and %s\n",conn->subscriptions[i].sub_name,topic);
+		if(strcmp(conn->subscriptions[i].sub_name,topic)==0)
+		{
+			conn->subscriptions[i].is_valid=0;
+		}
+	}
+
+	return ret;
+}
+
 int flux_handle_disconnect_message(struct flux_connection *conn)
 {
 }
