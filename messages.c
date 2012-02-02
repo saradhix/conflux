@@ -1,7 +1,12 @@
 #include "connection.h"
 #include "messages.h"
+#include "net.h"
 #include <string.h>
 
+extern int connection_count;
+/*
+extern struct flux_connection **connections;
+*/
 int flux_handle_connect_message(struct flux_connection *conn)
 {
 	int sock=0,ret=0;
@@ -15,9 +20,9 @@ int flux_handle_connect_message(struct flux_connection *conn)
 
 }
 
-int flux_handle_publish_message(struct flux_connection *conn)
+int flux_handle_publish_message(struct flux_connection *conn,struct flux_connection **connections)
 {
-	int sock=0,ret=0;
+	int sock=0,ret=0,i,j;
 	char topic[MAX_TOPIC_LEN]={0};
 	char payload[1000]={0};
 	int topic_len=0,payload_len=0;
@@ -40,6 +45,23 @@ int flux_handle_publish_message(struct flux_connection *conn)
 	if(ret<=0) return ret;
 	printf("Value of ret=%d\n",ret);
 	printf("Received from sock=%d tl=%d topic=%s pl=%d payload=%s\n",sock,topic_len,topic,payload_len,payload);
+
+
+/*Now route the message*/
+
+	for(i=0;i<connection_count;i++)
+	{
+		if(connections[i]==NULL) continue;
+		for(j=0;j<connections[i]->subscription_count;j++)
+		{
+			if(strcmp(connections[i]->subscriptions[j].sub_name,topic)==0)
+			{
+				printf("Sending message to %d\n",connections[i]->sock);
+				send_publish_msg(connections[i]->sock,topic,payload,payload_len);
+			}	
+		}
+	}
+
 	return ret;
 
 }

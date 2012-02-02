@@ -41,7 +41,7 @@ int send_publish_msg(int fd, char *topic, void *payload, int payload_length)
 	ptr+=payload_length;
 	ret=send(fd,(void *)buffer,total_length,0);
 	printf(" Bytes sent =Ret=%d\n",ret);
-	print_bytes(buffer,total_length);
+	//print_bytes(buffer,total_length);
 	return ret;
 }
 

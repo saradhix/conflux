@@ -17,13 +17,13 @@
 #define TIMEOUT 5
 #define MAX 20
 
-
+int connection_count=10;
 int main()
 {
 
-	struct flux_connection **connections=NULL, *new_connection=NULL;
-	int connection_count=10,true=1,new_sock;
+	int true=1,new_sock;
 	struct timeval timeout;
+	struct flux_connection **connections=NULL, *new_connection=NULL;
 
 	int sock,fdsock,fdcount;  
 	int i,ret,count=0,size=sizeof(struct sockaddr);
@@ -37,7 +37,7 @@ int main()
 	/*Initialise all connections to null*/
 
 	connections=flux_malloc(sizeof(struct flux_connection *)*connection_count);
-	memset(connections,0,4*connection_count);
+	memset(connections,0,sizeof(connections[0])*connection_count);
 
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
@@ -106,7 +106,7 @@ int main()
 				if(connections[i] && connections[i]->sock !=-1 && FD_ISSET(connections[i]->sock,&readfds))
 				{
 					printf("Some message received from %d\n",connections[i]->sock);
-					if(process_message(connections[i])<=0)
+					if(process_message(connections[i],connections)<=0)
 					{
 						process_close_message(connections[i],&readfds);
 					}
@@ -142,7 +142,7 @@ int main()
 	return 0;
 }
 
-int process_message(struct flux_connection *conn)
+int process_message(struct flux_connection *conn,struct flux_connection **connections)
 {
 	char buff[100]={0};
 	int command;
@@ -171,7 +171,7 @@ int process_message(struct flux_connection *conn)
 			break;
 		case DISCONNECT:break;
 		case PUBLISH:
-			ret=flux_handle_publish_message(conn);
+			ret=flux_handle_publish_message(conn,connections);
 			break;
 		case SUBSCRIBE:
 			ret=flux_handle_subscribe_message(conn);
