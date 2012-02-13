@@ -13,6 +13,7 @@
 
 #include "connection.h"
 #include "messages.h"
+#include "memory.h"
 
 #define TIMEOUT 5
 #define MAX 20

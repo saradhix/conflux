@@ -1,6 +1,7 @@
+#include <unistd.h>
+#include <string.h>
 #include "connection.h"
 #include "memory.h"
-#include <unistd.h>
 
 struct flux_connection *flux_connection_init(int sock ,struct sockaddr_in *client_addr)
 {

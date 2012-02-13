@@ -1,9 +1,11 @@
-#include "log.h"
 #include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "log.h"
 
 FILE *dbg_file ;
 char logDirStr[PATH_MAX];
