@@ -68,7 +68,7 @@ int main()
 		exit(1);
 	}
 
-	printf("TCPServer Waiting for client on port 5000\n");
+	printf("Flux started on port 5000!\n");
 	sigemptyset(&sigblock);
 	sigaddset(&sigblock, SIGINT);
 
@@ -82,23 +82,21 @@ int main()
 
 		for(i=0;i<connection_count;i++)
 		{
-			//if(connections[i])printf("i=%d sock=%d\n",i,connections[i]->sock);
-
 			if(connections[i] && connections[i]->sock !=-1)
 			{
 				FD_SET(connections[i]->sock,&readfds);
 				/*Add this socket to the fd set*/
-				//printf("Adding %d to list\n",connections[i]->sock);
 				if(connections[i]->sock > sockmax) sockmax=connections[i]->sock;
 			}
 		}
 		timeout.tv_sec = 5;
 		timeout.tv_usec=0;
-		printf("Blocking at pselect with sockmax=%d\n",sockmax);
+		snprintf(confluxlog,sizeof(confluxlog),"Blocking at pselect with sockmax=%d",sockmax);
+		conflux_debug_log(confluxlog);
 		fdcount = select(sockmax+1, &readfds, &writefds, NULL, &timeout);
 		if(fdcount == -1)
 		{
-			printf("Some error might have occured\n");
+			conflux_log("Some error might have occured");
 		}
 		else
 		{
@@ -106,7 +104,8 @@ int main()
 			{
 				if(connections[i] && connections[i]->sock !=-1 && FD_ISSET(connections[i]->sock,&readfds))
 				{
-					printf("Some message received from %d\n",connections[i]->sock);
+					snprintf(confluxlog,sizeof(confluxlog),"Some message received from %d",connections[i]->sock);
+					conflux_debug_log(confluxlog);
 					if(process_message(connections[i],connections)<=0)
 					{
 						process_close_message(connections[i],&readfds);
@@ -116,10 +115,10 @@ int main()
 		}
 		if(FD_ISSET(sock, &readfds))
 		{
-			printf("Blocking at accept\n");
 			new_sock = accept(sock, (struct sockaddr *)&client_addr, &size);
 			if(new_sock <0) perror("accept");
-			printf("New connection with size=%d ip=%s port=%d\n",size,inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
+			snprintf(confluxlog,sizeof(confluxlog),"New connection with size=%d ip=%s port=%d",size,inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
+			conflux_log(confluxlog);
 			new_connection = flux_connection_init(new_sock,&client_addr);
 			//strcpy(new_connection->ip,inet_ntoa(client_addr.sin_addr));
 			//new_connection->port=ntohs(client_addr.sin_port);
@@ -128,7 +127,8 @@ int main()
 				if(connections[i] == NULL)
 				{
 					connections[i] = new_connection;
-					printf("New fd= %d \n",connections[i]->sock);
+					snprintf(confluxlog,sizeof(confluxlog),"New fd= %d",connections[i]->sock);
+					conflux_log(confluxlog);
 					break;
 				}
 			}
@@ -156,19 +156,19 @@ int process_message(struct flux_connection *conn,struct flux_connection **connec
 /*Receive the 4 bytes command first. Based on it call appropriate handler function*/
 	if(ret<=0)
 	{
-		printf("Socket %d iss closed\n",socket);
+		snprintf(confluxlog,sizeof(confluxlog),"Socket %d iss closed",socket);
+		conflux_log(confluxlog);
 		return ret;
 	}
 
-	printf("ret=%d Command=%d from fd=%d\n",ret,command,socket);
+	snprintf(confluxlog,sizeof(confluxlog),"ret=%d Command=%d from fd=%d",ret,command,socket);
+	conflux_log(confluxlog);
 	//now go ahead and parse the remaining bytes
 	switch(command)
 	{
 		case CONNECT:
-			//ret=recv(socket,connect_msg.name,sizeof(connect_msg)-4,0);
 			ret=flux_handle_connect_message(conn);
 			return ret;
-			//printf("Received connect message with name %s\n",connect_msg.name);
 			break;
 		case DISCONNECT:break;
 		case PUBLISH:
@@ -183,7 +183,6 @@ int process_message(struct flux_connection *conn,struct flux_connection **connec
 
 
 	}
-	printf("Returning value %d\n",ret);
 	return ret;
 }
 
