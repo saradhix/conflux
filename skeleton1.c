@@ -24,7 +24,7 @@ int main()
 	char buff[160], payload[160],topic[16];
 	int i,ret,cx=0;
 	int topic_len=0,payload_len=0;
-	fd_set readfds,writefds;
+	fd_set readfds;
 	struct timeval timeout;
 	int fdcount=0;
 
@@ -55,7 +55,7 @@ int main()
 		timeout.tv_sec = 5;
 		timeout.tv_usec=0;
 		printf("Blocking at pselect with sockmax=%d\n",sock);
-		fdcount = select(sock+1, &readfds, &writefds, NULL, &timeout);
+		fdcount = select(sock+1, &readfds, NULL, NULL, &timeout);
 		if(fdcount == -1)
 		{
 			printf("Some error might have occured\n");
@@ -144,5 +144,7 @@ int skeleton_process_close_message(int sock)
 	//this is dummy for now
 	printf("Socket sock got closed from server\n");
 	close(sock);
+	printf("Flux process death. Unable to handle..Hence dieing\n");
+	exit(1);	
 	return 0;
 }
