@@ -12,7 +12,7 @@
 #define CONFLUX_MAX_LOGLEN 1024
 #define URDWRMASK 0664
 
-#define CONFLUX_DEBUG_FILE   "EPM_DEBUG_FILE"
+#define CONFLUX_DEBUG_FILE   "CONFLUX_DEBUG_FILE"
 #define DEF_CONFLUX_DBG_FILE "/tmp/conflux_debug"
 #define PATH_MAX 1024
 FILE *dbg_file;

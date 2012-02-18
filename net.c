@@ -1,6 +1,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "messages.h"
+#include "net.h"
+#include "log.h"
 
 
 int send_connect_msg(int fd, char *id)
@@ -22,7 +24,8 @@ int send_publish_msg(int fd, char *topic, void *payload, int payload_length)
 	int ret=0;
 	int command=PUBLISH,topic_len=0;
 	topic_len=strlen(topic);
-	printf("PL=%d TL=%d\n",payload_length,topic_len);
+	snprintf(confluxlog,sizeof(confluxlog),"PL=%d TL=%d",payload_length,topic_len);
+	conflux_debug_log(confluxlog);
 
 	/*4 bytes of command*/
 	memcpy(ptr,(char *)&command,4);
@@ -36,12 +39,14 @@ int send_publish_msg(int fd, char *topic, void *payload, int payload_length)
 	/*Encode payload len*/
 	memcpy(ptr,(char *)&payload_length,4);
 	ptr+=4;
-	printf("Payload_length=%d total=%d\n",payload_length,total_length);
+	snprintf(confluxlog,sizeof(confluxlog),"Payload_length=%d total=%d",payload_length,total_length);
+	conflux_debug_log(confluxlog);
 	/*Encode the payload*/
 	memcpy(ptr,(char *)payload,payload_length);
 	ptr+=payload_length;
 	ret=send(fd,(void *)buffer,total_length,0);
-	printf(" Bytes sent =Ret=%d\n",ret);
+	snprintf(confluxlog,sizeof(confluxlog)," Bytes sent =Ret=%d",ret);
+	conflux_debug_log(confluxlog);
 	//print_bytes(buffer,total_length);
 	return ret;
 }

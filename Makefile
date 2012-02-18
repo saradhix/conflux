@@ -20,13 +20,13 @@ log.o:	log.c
 	gcc -c log.c
 messages.o:	messages.c
 	gcc -c messages.c
-client:	client.c net.c
-	gcc client.c net.c -o client ${LIBS}
+client:	client.c net.c log.c
+	gcc client.c net.c log.c -o client ${LIBS}
 net.o:	net.c
 	gcc -c net.c
-skeleton1:	skeleton1.c net.c
-	gcc skeleton1.c net.c -o skeleton1 ${LIBS}
-skeleton2:	skeleton2.c net.c
-	gcc skeleton2.c net.c -o skeleton2 ${LIBS}
+skeleton1:	skeleton1.c net.c log.c
+	gcc skeleton1.c net.c log.c -o skeleton1 ${LIBS}
+skeleton2:	skeleton2.c net.c log.c
+	gcc skeleton2.c net.c log.c -o skeleton2 ${LIBS}
 clean:
 	rm -f ${PROGRAMS} *.o
