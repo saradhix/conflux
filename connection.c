@@ -33,14 +33,12 @@ int print_connections(struct flux_connection **c,int howmany)
 	{
 		if(c[i])
 		{
-			snprintf(confluxlog,sizeof(confluxlog),"i=%d sock=%d ip=%s port=%d state=%d",i,c[i]->sock,c[i]->ip,c[i]->port,c[i]->state);
-			conflux_log(confluxlog);
+			slog(LOG_INFO,"i=%d sock=%d ip=%s port=%d state=%d",i,c[i]->sock,c[i]->ip,c[i]->port,c[i]->state);
 			if(c[i]->subscription_count)
 			{
 				for(j=0;j<c[i]->subscription_count;j++)
 				{
-					snprintf(confluxlog,sizeof(confluxlog),"j=%d name=%s valid=%d",j,c[i]->subscriptions[j].sub_name,c[i]->subscriptions[j].is_valid);
-					conflux_log(confluxlog);
+					slog(LOG_INFO,"j=%d name=%s valid=%d",j,c[i]->subscriptions[j].sub_name,c[i]->subscriptions[j].is_valid);
 				}
 			}
 		}

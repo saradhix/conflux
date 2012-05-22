@@ -12,6 +12,9 @@
 
 #include "messages.h"
 #include "net.h"
+#include "config.h"
+
+struct config server;
 
 int main()
 {
@@ -23,6 +26,9 @@ int main()
 	char buff[160], payload[160],topic[16];
 	int i,ret,cx=0;
 	int topic_len=0,payload_len=0;
+
+	server.loglevel=1;
+
 
 	host = gethostbyname("127.0.0.1");
 

@@ -15,8 +15,7 @@ int flux_handle_connect_message(struct flux_connection *conn)
 	/*We have already read the command. Rest of the content in the flux_connect should be read*/
 	ret=recv(sock,name,sizeof(struct flux_connect)-sizeof(int),0);
 	if(ret<=0) return ret;
-	snprintf(confluxlog,sizeof(confluxlog),"Name of the agent : %s",name);
-	conflux_log(confluxlog);
+	slog(LOG_INFO,"Name of the agent : %s",name);
 	return ret;
 
 }
@@ -32,23 +31,19 @@ int flux_handle_publish_message(struct flux_connection *conn,struct flux_connect
 	/*Read topic length*/
 	ret=recv(sock,(char *)&topic_len,4,0);
 	if(ret<=0) return ret;
-	snprintf(confluxlog,sizeof(confluxlog),"Topic length=%d",topic_len);
-	conflux_log(confluxlog);
+	slog(LOG_INFO,"Topic length=%d",topic_len);
 	/*Read topic*/
 	ret=recv(sock,topic,topic_len,0);
 	if(ret<=0) return ret;
-	snprintf(confluxlog,sizeof(confluxlog),"Topic=%s",topic);
-	conflux_log(confluxlog);
+	slog(LOG_DEBUG,"Topic=%s",topic);
 	/*Read payload length*/
 	ret=recv(sock,(char *)&payload_len,4,0);
 	if(ret<=0) return ret;
-	snprintf(confluxlog,sizeof(confluxlog),"Payload len=%d",payload_len);
-	conflux_log(confluxlog);
+	slog(LOG_DEBUG,"Payload len=%d",payload_len);
 	/*Read the payload*/
 	ret=recv(sock,payload,payload_len,0);
 	if(ret<=0) return ret;
-	snprintf(confluxlog,sizeof(confluxlog),"Received from sock=%d tl=%d topic=%s pl=%d payload=%s",sock,topic_len,topic,payload_len,payload);
-	conflux_log(confluxlog);
+	slog(LOG_INFO,"Received from sock=%d tl=%d topic=%s pl=%d payload=%s",sock,topic_len,topic,payload_len,payload);
 
 
 /*Now route the message*/
@@ -60,8 +55,7 @@ int flux_handle_publish_message(struct flux_connection *conn,struct flux_connect
 		{
 			if(strcmp(connections[i]->subscriptions[j].sub_name,topic)==0)
 			{
-				snprintf(confluxlog,sizeof(confluxlog),"Sending message to %d",connections[i]->sock);
-				conflux_log(confluxlog);
+				slog(LOG_INFO,"Sending message to %d",connections[i]->sock);
 				send_publish_msg(connections[i]->sock,topic,payload,payload_len);
 			}	
 		}
@@ -82,14 +76,12 @@ int flux_handle_subscribe_message(struct flux_connection *conn)
 	/*Read the topic length*/
 	ret=recv(sock,(char *)&topic_length,4,0);
 	if(ret<=0) return ret;
-	snprintf(confluxlog,sizeof(confluxlog),"Topic length : %d",topic_length);
-	conflux_log(confluxlog);
+	slog(LOG_INFO,"Topic length : %d",topic_length);
 
 	/*Read the topic now*/
 	ret=recv(sock,topic,topic_length,0);
 	if(ret<=0) return ret;
-	snprintf(confluxlog,sizeof(confluxlog),"Topic =%s",topic);
-	conflux_log(confluxlog);
+	slog(LOG_INFO,"Topic =%s",topic);
 	strcpy(conn->subscriptions[conn->subscription_count].sub_name,topic);
 	conn->subscriptions[conn->subscription_count].is_valid=1;
 	conn->subscription_count++;
@@ -108,20 +100,17 @@ int flux_handle_unsubscribe_message(struct flux_connection *conn)
 	/*Read the topic length*/
 	ret=recv(sock,(char *)&topic_length,4,0);
 	if(ret<=0) return ret;
-	snprintf(confluxlog,sizeof(confluxlog),"Topic length : %d",topic_length);
-	conflux_log(confluxlog);
+	slog(LOG_INFO,"Topic length : %d",topic_length);
 
 	/*Read the topic now*/
 	ret=recv(sock,topic,topic_length,0);
 	if(ret<=0) return ret;
-	snprintf(confluxlog,sizeof(confluxlog)," Unsubscribed Topic =%s",topic);
-	conflux_log(confluxlog);
+	slog(LOG_INFO," Unsubscribed Topic =%s",topic);
 
 	/*Search for this topic and make the is_valid field for that particular sub as 0*/
 	for(i=0;i<conn->subscription_count;i++)
 	{
-		snprintf(confluxlog,sizeof(confluxlog),"Checking %s and %s",conn->subscriptions[i].sub_name,topic);
-		conflux_debug_log(confluxlog);
+		slog(LOG_DEBUG,"Checking %s and %s",conn->subscriptions[i].sub_name,topic);
 		if(strcmp(conn->subscriptions[i].sub_name,topic)==0)
 		{
 			conn->subscriptions[i].is_valid=0;

@@ -12,7 +12,9 @@
 
 #include "messages.h"
 #include "net.h"
+#include "config.h"
 
+struct config server;
 int default_publish_handler(char *topic, void *payload, int length);
 int main()
 {
@@ -28,6 +30,8 @@ int main()
 	struct timeval timeout;
 	time_t t;
 	int fdcount=0;
+
+	server.loglevel=1;
 
 	host = gethostbyname("127.0.0.1");
 

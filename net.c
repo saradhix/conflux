@@ -24,8 +24,7 @@ int send_publish_msg(int fd, char *topic, void *payload, int payload_length)
 	int ret=0;
 	int command=PUBLISH,topic_len=0;
 	topic_len=strlen(topic);
-	snprintf(confluxlog,sizeof(confluxlog),"PL=%d TL=%d",payload_length,topic_len);
-	conflux_debug_log(confluxlog);
+	slog(LOG_DEBUG,"PL=%d TL=%d",payload_length,topic_len);
 
 	/*4 bytes of command*/
 	memcpy(ptr,(char *)&command,4);
@@ -39,14 +38,12 @@ int send_publish_msg(int fd, char *topic, void *payload, int payload_length)
 	/*Encode payload len*/
 	memcpy(ptr,(char *)&payload_length,4);
 	ptr+=4;
-	snprintf(confluxlog,sizeof(confluxlog),"Payload_length=%d total=%d",payload_length,total_length);
-	conflux_debug_log(confluxlog);
+	slog(LOG_DEBUG,"Payload_length=%d total=%d",payload_length,total_length);
 	/*Encode the payload*/
 	memcpy(ptr,(char *)payload,payload_length);
 	ptr+=payload_length;
 	ret=send(fd,(void *)buffer,total_length,0);
-	snprintf(confluxlog,sizeof(confluxlog)," Bytes sent =Ret=%d",ret);
-	conflux_debug_log(confluxlog);
+	slog(LOG_DEBUG," Bytes sent =Ret=%d",ret);
 	//print_bytes(buffer,total_length);
 	return ret;
 }
